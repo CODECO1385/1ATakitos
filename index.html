@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<title>Takitos con Sabor — Menú en Realidad Aumentada</title>
+<meta name="description" content="Takitos con Sabor — Explora nuestros platillos y míralos desde tu cámara en realidad aumentada." />
+<meta name="theme-color" content="#0a0a0a" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-glyph" aria-hidden="true">✦</span>
+        <span class="brand-name" id="brandName">Takitos con Sabor</span>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-link" data-goto="menu">Menú</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       VISTA: HOME
+  ============================================================ -->
+  <main id="view-home" class="view view-home is-active">
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-photo"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-glow"></div>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow" id="brandTagline">Con sabor auténtico</p>
+        <h1 class="hero-title" id="brandNameHero">Takitos con Sabor</h1>
+        <p class="hero-sub">Explora nuestros platillos y míralos desde tu cámara.</p>
+        <button class="btn btn-primary btn-lg" id="btnVerMenu">
+          Ver menú
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <div class="hero-scan" aria-hidden="true">
+        <div class="scan-frame">
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       VISTA: MENÚ
+  ============================================================ -->
+  <main id="view-menu" class="view view-menu">
+    <section class="menu-header">
+      <button class="btn-back" data-goto="home" aria-label="Volver al inicio">←</button>
+      <div>
+        <p class="eyebrow">Menú</p>
+        <h2 class="section-title">Nuestros Platillos</h2>
+      </div>
+    </section>
+
+    <section class="menu-grid" id="menuGrid" aria-live="polite">
+      <!-- Tarjetas de producto generadas dinámicamente -->
+    </section>
+  </main>
+
+  <!-- ============================================================
+       VISTA: DETALLE DEL PLATILLO
+  ============================================================ -->
+  <main id="view-dish" class="view view-dish">
+    <section class="dish-detail" id="dishDetail">
+      <!-- Generado dinámicamente -->
+    </section>
+  </main>
+
+  <!-- ============================================================
+       GALERÍA NORMAL (previa a AR) — visor de pantalla completa
+  ============================================================ -->
+  <div id="galleryOverlay" class="gallery-overlay" aria-hidden="true">
+    <div class="gallery-top-bar">
+      <button class="icon-btn" id="btnCloseGallery" aria-label="Cerrar galería">✕</button>
+      <span class="gallery-product-name" id="galleryProductName"></span>
+    </div>
+
+    <div class="gallery-stage" id="galleryStage">
+      <div class="gallery-track" id="galleryTrack">
+        <!-- Slides generados dinámicamente -->
+      </div>
+    </div>
+
+    <button class="gallery-nav gallery-nav--prev" id="btnGalleryPrev" aria-label="Fotografía anterior">‹</button>
+    <button class="gallery-nav gallery-nav--next" id="btnGalleryNext" aria-label="Siguiente fotografía">›</button>
+
+    <div class="gallery-bottom">
+      <p class="gallery-hint">Desliza para ver el platillo</p>
+      <div class="gallery-dots" id="galleryDots" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EXPERIENCIA AR (overlay de pantalla completa)
+  ============================================================ -->
+  <div id="arOverlay" class="ar-overlay" aria-hidden="true">
+
+    <!-- Video de la cámara -->
+    <video id="arVideo" class="ar-video" autoplay playsinline muted></video>
+
+    <!-- Canvas oculto usado solo para generar la captura -->
+    <canvas id="arCanvas" class="ar-canvas-hidden"></canvas>
+
+    <!-- Superficie AR: contiene el platillo interactivo -->
+    <div class="ar-surface" id="arSurface">
+      <div class="ar-dish" id="arDish">
+        <div class="ar-dish-shadow" aria-hidden="true"></div>
+
+        <!-- INTEGRACIÓN 3D FUTURA: este <img> es el reemplazo temporal
+             de un modelo real. Cuando exista dish-01.glb, este bloque
+             se sustituiría por un <canvas> renderizado con Three.js +
+             GLTFLoader, manteniendo la misma posición/escala/rotación
+             que hoy controla `arTransform` en app.js. -->
+        <img id="arDishImg" class="ar-dish-img" src="" alt="Platillo en realidad aumentada" draggable="false" />
+
+        <div class="ar-photo-dots" id="arPhotoDots" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- Instrucciones de gestos — NO viven dentro de .ar-dish para que
+         nunca se muevan ni queden cubiertas cuando el usuario arrastra
+         el platillo por la pantalla. Se desvanecen solas a los pocos
+         segundos, o en cuanto el usuario hace su primer gesto. -->
+    <div class="ar-gesture-hints" id="arGestureHints" aria-hidden="true">
+      <span class="hint-chip">☝️ Mueve</span>
+      <span class="hint-chip">🤏 Zoom</span>
+      <span class="hint-chip">🔄 Gira</span>
+    </div>
+
+    <!-- Encabezado -->
+    <div class="ar-top-bar">
+      <button class="icon-btn" id="btnCloseAR" aria-label="Cerrar realidad aumentada">✕</button>
+      <span class="ar-live-badge"><span class="pulse-dot" aria-hidden="true"></span> AR EN VIVO</span>
+      <span class="ar-product-name" id="arProductName">—</span>
+    </div>
+
+    <!-- Controles inferiores -->
+    <div class="ar-bottom-bar">
+      <div class="ar-reset-row">
+        <button class="action-btn" id="btnResetDish">
+          <span class="action-icon">↺</span> Reset
+        </button>
+      </div>
+
+      <div class="ar-actions-row">
+        <button class="action-btn" id="btnSwitchDish">
+          <span class="action-icon">⇄</span> Platillos
+        </button>
+        <button class="action-btn primary" id="btnCapture">
+          <span class="action-icon">◎</span> Capturar
+        </button>
+        <button class="action-btn" id="btnShare">
+          <span class="action-icon">↗</span> Compartir
+        </button>
+      </div>
+    </div>
+
+    <!-- Bandeja inferior para cambiar de platillo -->
+    <div class="dish-tray" id="dishTray" aria-hidden="true">
+      <p class="dish-tray-title">Platillos</p>
+      <div class="dish-tray-inner" id="dishTrayInner">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- Vista previa de la captura -->
+    <div class="capture-preview" id="capturePreview" aria-hidden="true">
+      <div class="capture-card">
+        <img id="captureImg" alt="Captura de la experiencia AR" />
+        <div class="capture-actions">
+          <button class="btn btn-secondary" id="btnCaptureClose">Cerrar</button>
+          <a class="btn btn-primary" id="btnCaptureDownload" download="takitos-ar.png">Descargar</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pantalla de error de permisos/cámara -->
+    <div class="ar-error-screen" id="arErrorScreen" aria-hidden="true">
+      <div class="ar-error-card">
+        <span class="ar-error-icon" id="arErrorIcon" aria-hidden="true">📷</span>
+        <h3 id="arErrorTitle">No pudimos acceder a tu cámara</h3>
+        <p id="arErrorMessage">Necesitamos acceso a la cámara para mostrar el platillo.</p>
+        <div class="ar-error-actions">
+          <button class="btn btn-primary" id="btnRetryCamera">Intentar nuevamente</button>
+          <button class="btn btn-secondary" id="btnCancelAR">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modo demo de escritorio (sin cámara) -->
+    <div class="desktop-demo-badge-wrap" id="arDesktopDemo" aria-hidden="true">
+      <p class="desktop-demo-badge">Modo demostración de escritorio — sin cámara</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="site-footer">
+    <p>Takitos con Sabor © 2026 — Demostración de menú en Realidad Aumentada</p>
+    <p class="footer-sub">Prototipo funcional. La detección de superficies 3D real se integrará en una fase posterior.</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
